@@ -1,1 +1,4 @@
 django
+
+factory_boy
+ipython
