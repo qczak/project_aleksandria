@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 # Create your models here.
@@ -21,16 +22,24 @@ class Enrollment(models.Model):
         return f'{self.user.username} {self.course.title}'
 
 class Review(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    user = models.ForeignKey("auth.User", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    review_date = models.DateField(auto_now_add=True)
+    review_data = models.DateField(auto_now_add=True)
     rating = models.PositiveIntegerField(
-        choices=[(i,str(i)) for i in range(1, 6)]
+        choices=RATING_CHOICES
     )
     comment = models.TextField(blank=True)
 
+    def save(self, *args, **kwargs):
+        # print(self.rating, type(self.rating))
+        if self.rating not in [x[0] for x in self.RATING_CHOICES]:
+            raise ValidationError("Invalid rating.")
+
+        super().save(*args, **kwargs)
     def __str__(self):
-        return f'{self.user.username} - {self.course.title} - {self.rating}'
+        return f"{self.user.username} - {self.course.title} - {self.rating}"
 
     # metadane dotyczące Klasy - tu tworzy powiązanie między komórkami
     # class Meta:

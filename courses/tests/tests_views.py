@@ -45,3 +45,19 @@ class TestEnrollmentView(TestCase):
         response = self.client.post(enroll_url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'You are already enrolled in the course.')
+
+class TestReviewView(TestCase):
+    def setUp(self):
+        self.course = factories.CourseFactory()
+        self.user = factories.UserFactory()
+
+    def test_add_review(self):
+        review_data = {"rating":4,
+                       "comment":"aaaa"
+                       }
+        self.client.force_login(self.user)
+        review_url = reverse("add-review", kwargs={"pk": self.course.id})  # /courses/1/enroll/
+        self.assertEqual(self.course.review_set.count(), 0)
+        response = self.client.post(review_url, follow=True, data=review_data)
+        self.assertEqual(self.course.review_set.count(), 1)
+        self.assertEqual(self.course.review_set.last().rating,review_data["rating"])

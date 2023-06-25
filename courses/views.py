@@ -7,12 +7,18 @@ def course_list(request):
     return render(request, 'courses/course_list.html', {"courses": Course.objects.all()})
 
 def course_detail(request, pk):
+
+    context = {
+        "course": Course.objects.get(id=pk),
+        "reviews": Review.objects.filter(course=pk),
+        "user_enrolled": Enrollment.objects.filter(user=request.user, course=pk).exists(),
+    }
+
     return render(
         request,
         'courses/course_detail.html',
-        {"course": Course.objects.get(id=pk), "reviews": Review.objects.all()}
+        context
     )
-
 def add_review(request, pk):
     course = Course.objects.get(id=pk)
 
